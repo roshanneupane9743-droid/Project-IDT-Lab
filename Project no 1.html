@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+    <title>ClassConnect</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        :root {
+            --bg: #eef1ff;
+            --card: #fff;
+            --tx: #1b2333;
+            --mu: #667085;
+            --ac: #4c5fd5;
+            --ac2: #e8ebff;
+            --bd: #e3e8f0;
+            --ok: #2b8a3e;
+            --er: #c92a2a;
+            box-sizing: border-box;
+            padding-top: env(safe-area-inset-top, 0px);
+            padding-bottom: env(safe-area-inset-bottom, 0px)
+        }
+
+        @media(prefers-color-scheme:dark) {
+            :root:not([data-theme=light]) {
+                --bg: #0e1220;
+                --card: #181e30;
+                --tx: #e8ecf4;
+                --mu: #98a2b3;
+                --bd: #29324a;
+                --ac2: #242d55
+            }
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        html,
+        body {
+            height: 100%
+        }
+
+        body {
+            margin: 0;
+            font: 15px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif;
+            background: var(--bg);
+            color: var(--tx);
+            overflow: hidden;
+            height: 100dvh
+        }
+
+        .blob {
+            position: fixed;
+            border-radius: 50%;
+            opacity: .5;
+            z-index: 0;
+            will-change: transform;
+            animation: fl 18s ease-in-out infinite alternate
+        }
+
+        .b1 {
+            width: 420px;
+            height: 420px;
+            background: radial-gradient(circle, #7d8af3, #7c8cff00 70%);
+            top: -80px;
+            left: -80px
+        }
+
+        .b2 {
+            width: 380px;
+            height: 380px;
+            background: radial-gradient(circle, #ff9ecb, #ff9ecb00 70%);
+            bottom: -60px;
+            right: -60px;
+            animation-delay: -6s
+        }
+
+        @keyframes fl {
+            to {
+                transform: translate(60px, 40px) scale(1.2)
+            }
+        }
+
+        button,
+        input,
+        select {
+            font: inherit
+        }
+
+        button {
+            cursor: pointer;
+            border: 0;
+            border-radius: 12px;
+            padding: 10px 16px;
+            background: linear-gradient(135deg, var(--ac), #8a5cf6);
+            color: #fff;
+            font-weight: 600;
+            transition: transform .15s, box-shadow .15s
+        }
+
+        button:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px #4c5fd54d
+        }
+
+        button:active {
+            transform: scale(.97)
+        }
+
+        button.g {
+            background: var(--ac2);
+            color: var(--ac)
+        }
+
+        button:disabled {
+            opacity: .5;
+            cursor: not-allowed
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 11px;
+            border: 1px solid var(--bd);
+            border-radius: 12px;
+            background: var(--card);
+            color: var(--tx)
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--bd);
+            border-radius: 20px;
+            padding: 22px;
+            box-shadow: 0 10px 40px #4c5fd51f
+        }
+
+        #root {
+            height: 100%;
+            position: relative;
+            z-index: 1
+        }
+
+        .center {
+            position: relative;
+            z-index: 1;
+            height: 100%;
+            display: grid;
+            padding: 16px;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch
+        }
+
+        .w {
+            margin: auto;
+            width: min(430px, 100%);
+            display: grid;
+            gap: 14px
+        }
+
+        .anim .w {
+            animation: in .5s cubic-bezier(.2, .8, .2, 1)
+        }
+
+        @keyframes in {
+            from {
+                opacity: 0;
+                transform: translateX(40px) scale(.97)
+            }
+        }
+
+        @keyframes pop {
+            from {
+                opacity: 0;
+                transform: scale(.85) translateY(8px)
+            }
+        }
+
+        h1,
+        h2,
+        h3 {
+            margin: 0
+        }
+
+        .mu {
+            color: var(--mu);
+            font-size: 13px;
+            margin: 0
+        }
+
+        .row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap
+        }
+
+        .logo {
+            font-size: 38px;
+            animation: bob 3s ease-in-out infinite
+        }
+
+        @keyframes bob {
+            50% {
+                transform: translateY(-6px)
+            }
+        }
+
+        .seg {
+            display: flex;
+            background: var(--ac2);
+            border-radius: 12px;
+            padding: 3px
+        }
+
+        .seg button {
+            flex: 1;
+            background: none;
+            color: var(--ac);
+            box-shadow: none
+        }
+
+        .seg button.on {
+            background: var(--ac);
+            color: #fff
+        }
+
+        .dots {
+            display: flex;
+            gap: 6px;
+            justify-content: center
+        }
+
+        .dots i {
+            height: 6px;
+            width: 22px;
+            border-radius: 9px;
+            background: var(--bd)
+        }
+
+        .dots i.on {
+            background: var(--ac)
+        }
+
+        .face {
+            width: 190px;
+            height: 190px;
+            border-radius: 50%;
+            margin: 4px auto;
+            position: relative;
+            overflow: hidden;
+            border: 3px solid var(--ac);
+            display: grid;
+            place-items: center;
+            font-size: 80px;
+            background: var(--ac2);
+            animation: pulse 2s infinite
+        }
+
+        .face video {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scaleX(-1)
+        }
+
+        .face.scan::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: #5eead4;
+            box-shadow: 0 0 14px #5eead4;
+            animation: sc 1.2s ease-in-out infinite alternate
+        }
+
+        @keyframes sc {
+            from {
+                top: 0
+            }
+
+            to {
+                top: 100%
+            }
+        }
+
+        @keyframes pulse {
+            50% {
+                box-shadow: 0 0 0 14px #4c5fd520
+            }
+        }
+
+        .sub {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            padding: 12px;
+            border: 2px solid var(--bd);
+            border-radius: 14px;
+            background: var(--card);
+            cursor: pointer;
+            transition: .2s
+        }
+
+        .sub.on {
+            border-color: var(--ac);
+            background: var(--ac2);
+            transform: scale(1.02)
+        }
+
+        .grp {
+            animation: pop .4s backwards;
+            padding: 10px 12px;
+            border-radius: 12px;
+            background: var(--ac2);
+            margin-top: 6px
+        }
+
+        .app {
+            position: relative;
+            z-index: 1;
+            display: grid;
+            grid-template-columns: 260px minmax(0, 1fr);
+            grid-template-rows: minmax(0, 1fr);
+            height: 100%
+        }
+
+        .side {
+            background: var(--card);
+            border-right: 1px solid var(--bd);
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            overflow: auto
+        }
+
+        .gi {
+            text-align: left;
+            background: none;
+            color: var(--tx);
+            font-weight: 500;
+            padding: 9px 10px;
+            box-shadow: none !important
+        }
+
+        .gi.on {
+            background: var(--ac2);
+            color: var(--ac)
+        }
+
+        .gi.lock {
+            opacity: .4
+        }
+
+        .gh {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: var(--mu);
+            margin: 10px 4px 2px;
+            letter-spacing: .06em
+        }
+
+        .main {
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            min-height: 0;
+            height: 100%;
+            background: var(--bg)
+        }
+
+        .top {
+            padding: 12px 16px;
+            background: var(--card);
+            border-bottom: 1px solid var(--bd)
+        }
+
+        .tabs {
+            display: flex;
+            gap: 6px;
+            padding: 8px 12px;
+            background: var(--card);
+            border-bottom: 1px solid var(--bd);
+            overflow-x: auto
+        }
+
+        .tabs button {
+            background: none;
+            color: var(--mu);
+            box-shadow: none
+        }
+
+        .tabs button.on {
+            background: var(--ac2);
+            color: var(--ac)
+        }
+
+        .msgs,
+        .pad {
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px
+        }
+
+        .msgs>*,
+        .pad>* {
+            flex-shrink: 0
+        }
+
+        .m {
+            max-width: min(520px, 88%);
+            background: var(--card);
+            border: 1px solid var(--bd);
+            border-radius: 14px;
+            padding: 9px 12px;
+            align-self: flex-start
+        }
+
+        .m.me {
+            align-self: flex-end;
+            background: var(--ac2)
+        }
+
+        .m b {
+            font-size: 12px;
+            color: var(--ac)
+        }
+
+        .m img {
+            max-width: 100%;
+            border-radius: 10px;
+            margin-top: 4px
+        }
+
+        .att {
+            border: 2px solid var(--ac);
+            max-width: min(340px, 92%)
+        }
+
+        .code {
+            font: 700 28px ui-monospace, monospace;
+            letter-spacing: 6px;
+            text-align: center
+        }
+
+        .bar {
+            padding: 10px 12px;
+            border-top: 1px solid var(--bd);
+            background: var(--card);
+            display: flex;
+            gap: 6px
+        }
+
+        .tw {
+            overflow-x: auto
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%
+        }
+
+        td,
+        th {
+            padding: 8px 10px;
+            border-bottom: 1px solid var(--bd);
+            text-align: left;
+            white-space: nowrap
+        }
+
+        .ok {
+            color: var(--ok)
+        }
+
+        .er {
+            color: var(--er)
+        }
+
+        .gal {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 10px
+        }
+
+        .gal div {
+            background: var(--card);
+            border: 1px solid var(--bd);
+            border-radius: 12px;
+            padding: 8px;
+            font-size: 13px;
+            word-break: break-word
+        }
+
+        .gal img {
+            width: 100%;
+            border-radius: 8px
+        }
+
+        .ov {
+            position: fixed;
+            inset: 0;
+            background: #0006;
+            z-index: 20;
+            animation: fade .2s
+        }
+
+        .drw {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            width: min(320px, 86vw);
+            background: var(--card);
+            z-index: 21;
+            padding: 16px;
+            padding-top: calc(16px + env(safe-area-inset-top, 0px));
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            animation: slide .25s;
+            box-shadow: 6px 0 30px #0003
+        }
+
+        .drw .gi {
+            width: 100%
+        }
+
+        .drw details {
+            margin-top: 4px
+        }
+
+        .drw summary {
+            cursor: pointer;
+            font-weight: 700;
+            padding: 10px;
+            border-radius: 10px;
+            background: var(--ac2);
+            color: var(--ac)
+        }
+
+        @keyframes fade {
+            from {
+                opacity: 0
+            }
+        }
+
+        @keyframes slide {
+            from {
+                transform: translateX(-100%)
+            }
+        }
+
+        .stat {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px
+        }
+
+        .stat div {
+            background: var(--card);
+            border: 1px solid var(--bd);
+            border-radius: 14px;
+            padding: 14px;
+            text-align: center;
+            display: grid;
+            gap: 2px
+        }
+
+        .stat b {
+            font-size: 30px
+        }
+
+        .stat span {
+            font-size: 12px;
+            color: var(--mu)
+        }
+
+        #toast {
+            position: fixed;
+            left: 50%;
+            bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+            transform: translateX(-50%);
+            background: #222;
+            color: #fff;
+            padding: 10px 16px;
+            border-radius: 10px;
+            display: none;
+            z-index: 9;
+            max-width: 90%
+        }
+
+        @media(max-width:720px) {
+            .app {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto minmax(0, 1fr)
+            }
+
+            .side {
+                flex-direction: row;
+                overflow-x: auto;
+                border-right: 0;
+                border-bottom: 1px solid var(--bd)
+            }
+
+            .gi {
+                white-space: nowrap
+            }
+
+            .side .hd,
+            .gh {
+                display: none
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="blob b1"></div>
+    <div class="blob b2"></div>
+    <div id="root"></div>
+    <div id="toast"></div>
+    <script>
+        const $ = s => document.querySelector(s), root = $('#root');
+        const ALL = ['Maths', 'Science', 'English', 'Social'];
+        const S = {
+            role: 'student', mode: 'phone', id: '', step: 'login', subs: [], group: 'all', tab: 'chat', msgs: {}, me: Object.fromEntries(ALL.map((s, k) => [s, [9 - k, 10]])), sess: null, far: false,
+            students: ['Aarav Sharma', 'Diya Nair', 'Kabir Rao', 'Meera Iyer', 'Rohan Das', 'Sana Khan'].map((n, i) => ({n, roll: i + 1, att: Object.fromEntries(ALL.map((s, k) => [s, [10 - ((i + k) % 4), 10]]))}))
+        };
+        function toast(t) {const e = $('#toast'); e.textContent = t; e.style.display = 'block'; clearTimeout(toast.t); toast.t = setTimeout(() => e.style.display = 'none', 3000)}
+        const esc = s => String(s).replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]));
+        const dots = n => `<div class="dots">${[0, 1, 2, 3].map(i => `<i class="${i <= n ? 'on' : ''}"></i>`).join('')}</div>`;
+        function render() {
+            const st = S.step; root.className = render.l !== st ? 'anim' : ''; render.l = st;
+            if (st == 'login') return root.innerHTML = `<div class="center"><div class="w card"><div style="text-align:center"><div class="logo">📚</div><h1>ClassConnect</h1><p class="mu">Study, chat and attendance in one place</p></div>${dots(0)}
+ <div class="seg"><button class="${S.role == 'teacher' ? 'on' : ''}" onclick="S.role='teacher';render()">Teacher</button><button class="${S.role == 'student' ? 'on' : ''}" onclick="S.role='student';render()">Student</button></div>
+ <div class="seg"><button class="${S.mode == 'phone' ? 'on' : ''}" onclick="S.mode='phone';S.id='';render()">Phone</button><button class="${S.mode == 'email' ? 'on' : ''}" onclick="S.mode='email';S.id='';render()">Email</button></div>
+ <input id="id" type="${S.mode == 'phone' ? 'tel' : 'email'}" placeholder="${S.mode == 'phone' ? '+91 98765 43210' : 'you@school.edu'}" value="${esc(S.id)}" onkeydown="event.key=='Enter'&&sendOtp()">
+ <button onclick="sendOtp()">Send code</button><p class="mu">Prototype: no SMS or email is sent. Demo code is 123456.</p><details ontoggle="drawQR()"><summary style="cursor:pointer;font-weight:600;color:var(--ac)">📱 Scan to open on your phone</summary><div class="qr" data-w="200" data-t="https://claude.ai/artifact/AJBh3u7h2n26hWq69SxaVN" style="display:grid;place-items:center;margin:12px;background:#fff;padding:10px;border-radius:12px"></div><p class="mu" style="text-align:center">Point your phone camera here to open the login page.</p></details></div></div>`;
+            if (st == 'otp') return root.innerHTML = `<div class="center"><div class="w card"><h2>Enter code</h2><p class="mu">Sent to ${esc(S.id)}</p>${dots(1)}<input id="otp" inputmode="numeric" maxlength="6" placeholder="6-digit code" onkeydown="event.key=='Enter'&&verOtp()"><button onclick="verOtp()">Verify</button><button class="g" onclick="S.step='login';render()">Back</button></div></div>`;
+            if (st == 'face') return root.innerHTML = `<div class="center"><div class="w card"><h2 style="text-align:center">Face ID</h2>${dots(2)}<div class="face" id="face">🙂<video id="v" autoplay playsinline muted style="display:none"></video></div><p class="mu" style="text-align:center" id="fm">Look at the camera. Your photo goes to your teacher/admin for approval.</p>
+ <label class="row"><input type="checkbox" id="cons" style="width:auto"> I consent to face verification</label><button onclick="cam()">Start Face ID</button><button class="g" onclick="done('alt')">No camera? Use alternative</button><button class="g" onclick="S.step='otp';render()">← Back</button></div></div>`;
+            if (st == 'subj') {
+                const n = S.subs.length; return root.innerHTML = `<div class="center"><div class="w card"><h2>${S.role == 'teacher' ? 'Create your subjects' : 'Choose your subjects'}</h2><p class="mu">${S.role == 'teacher' ? 'Pick up to 2 subjects. Each one gets 2 groups automatically.' : 'Pick the subjects you study. You will join their groups.'}</p>${dots(3)}
+ ${ALL.map(s => `<div class="sub ${S.subs.includes(s) ? 'on' : ''}" onclick="pick('${s}')"><span style="font-size:22px">${S.subs.includes(s) ? '✅' : '📘'}</span><b>${esc(s)}</b></div>`).join('')}
+ ${S.role == 'teacher' ? '<div class="row"><input id="ns" placeholder="Add a new subject" style="flex:1"><button class="g" onclick="addSub()">Add</button></div>' : ''}
+ ${S.subs.map((s, i) => `<div class="grp" style="animation-delay:${i * .1}s"><b>${esc(s)}</b>${S.role == 'teacher' ? `<div class="mu">🔒 ${esc(s)} · Teachers only</div>` : ''}<div class="mu">👥 ${esc(s)} · Everyone (students + teachers)</div></div>`).join('')}
+ <button onclick="S.in=1;S.step='app';render()" ${n ? '' : 'disabled'}>${S.role == 'teacher' ? 'Create groups &amp; continue' : 'Join &amp; continue'} →</button><button class="g" onclick="S.step=S.in?'app':'face';render()">← Back</button></div></div>`
+            }
+            app()
+        }
+        function sendOtp() {const v = $('#id').value.trim(); const ok = S.mode == 'phone' ? /^\+\d{8,15}$/.test(v.replace(/[\s-]/g, '')) : /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v); if (!ok) return toast(S.mode == 'phone' ? 'Enter number with country code' : 'Enter a valid email'); S.id = v; S.step = 'otp'; render()}
+        function verOtp() {if ($('#otp').value !== '123456') return toast('Incorrect code'); S.step = 'face'; render()}
+        async function cam() {
+            if (!$('#cons').checked) return toast('Please tick consent first');
+            try {const m = await navigator.mediaDevices.getUserMedia({video: true}), v = $('#v'); v.srcObject = m; v.style.display = 'block'; $('#face').classList.add('scan'); $('#fm').textContent = 'Scanning…'; setTimeout(() => {m.getTracks().forEach(t => t.stop()); if (S.step != 'face') return; $('#face').classList.remove('scan'); $('#fm').textContent = '✓ Verified (demo)'; setTimeout(() => done('face'), 700)}, 2600)} catch (e) {toast('Camera unavailable. Use the alternative.')}
+        }
+        function done(m) {toast(m == 'face' ? 'Photo sent for approval (demo)' : 'Alternative verification requested'); S.step = 'subj'; render()}
+        function pick(s) {const i = S.subs.indexOf(s); if (i >= 0) S.subs.splice(i, 1); else if (S.role == 'teacher' && S.subs.length >= 2) toast('A teacher can create only 2 subjects'); else S.subs.push(s); render()}
+        function addSub() {const v = $('#ns').value.trim(); if (!v) return; if (!ALL.includes(v)) ALL.push(v); if (S.subs.length < 2 && !S.subs.includes(v)) S.subs.push(v); else if (S.subs.length >= 2) toast('Max 2 subjects. Added to list only.'); render()}
+        const sub = g => g.split('|')[0], kind = g => g.split('|')[1];
+        function can(g) {if (g == 'all') return true; if (S.role == 'student') return kind(g) == 'e'; return S.subs.includes(sub(g))}
+        function vis(g) {return g == 'all' || (S.role == 'teacher' ? true : (kind(g) == 'e' && S.subs.includes(sub(g))))}
+        const gname = g => g == 'all' ? '👥 Whole class' : (kind(g) == 't' ? '🔒 ' : '👥 ') + sub(g) + ' · ' + (kind(g) == 't' ? 'Teachers only' : 'Everyone');
+        function gm(g) {return S.msgs[g] = S.msgs[g] || [{u: 'System', t: g == 'all' ? 'Whole-class group created.' : gname(g) + ' group created.', k: 't'}]}
+        function app(keep) {
+            const sc = {};['msgs', 'pad', 'side'].forEach(c => {const e = document.querySelector('.' + c); sc[c] = e ? e.scrollTop : 0});
+            const gl = ['all', ...ALL.flatMap(s => [s + '|t', s + '|e'])].filter(vis); let last = '';
+            root.innerHTML = `<div class="app"><nav class="side"><div class="hd"><h3>📚 ClassConnect</h3><p class="mu">${S.role == 'teacher' ? 'Teacher' : 'Student'} · ${esc(S.id)}</p></div>
+ ${gl.map(g => {const h = g != 'all' && sub(g) != last ? (last = sub(g), `<div class="gh">${esc(last)}</div>`) : ''; return h + `<button class="gi ${S.group == g ? 'on' : ''} ${can(g) ? '' : 'lock'}" onclick="go('${g}')">${gname(g)}${can(g) ? '' : ' 🔒'}</button>`}).join('')}
+ <div class="hd" style="margin-top:auto"><button class="g" style="width:100%" onclick="logout()">Log out</button></div></nav>
+ <section class="main"><div class="top row" style="justify-content:space-between;flex-wrap:nowrap"><div class="row" style="flex-wrap:nowrap;min-width:0"><button class="g" aria-label="Open subject menu" onclick="S.menu=1;app(true)">☰</button><div style="min-width:0"><h3>${gname(S.group)}</h3><span class="mu">${S.group == 'all' ? 'Everyone in the class' : kind(S.group) == 't' ? 'Visible to teachers only' : 'Students and teachers'}</span></div></div><div class="row" style="flex-wrap:nowrap"><button class="g" onclick="back()">← Back</button><button class="g" onclick="logout()">Log out</button></div></div>
+ <div class="tabs">${[['chat', '💬 Chat'], ['att', '📍 Attendance'], ['files', '🖼️ Photos & files']].map(([k, l]) => `<button class="${S.tab == k ? 'on' : ''}" onclick="S.tab='${k}';app()">${l}</button>`).join('')}</div>
+ ${S.tab == 'chat' ? chat() : S.tab == 'att' ? attTab() : files()}</section>${S.menu ? menu() : ''}</div>`;
+            const sd = $('.side'); if (sd) sd.scrollTop = sc.side; const pd = $('.pad'); if (pd && keep) pd.scrollTop = sc.pad; const m = $('.msgs'); if (m) m.scrollTop = keep ? sc.msgs : 1e9; drawQR()
+        }
+        function menu() {const x = () => "S.menu=0;app(true)"; return `<div class="ov" onclick="${x()}"></div><aside class="drw"><div class="row" style="justify-content:space-between"><h3>All subjects</h3><button class="g" aria-label="Close" onclick="${x()}">✕</button></div><button class="gi ${S.group == 'all' ? 'on' : ''}" onclick="pickG('all')">👥 Whole class</button>${ALL.map(s => {const j = S.role == 'teacher' || S.subs.includes(s); return `<details ${S.group.split('|')[0] == s ? 'open' : ''}><summary>${S.subs.includes(s) ? '⭐ ' : '📘 '}${esc(s)}</summary>${j ? ['t', 'e'].filter(k => vis(s + '|' + k)).map(k => `<button class="gi ${S.group == s + '|' + k ? 'on' : ''} ${can(s + '|' + k) ? '' : 'lock'}" onclick="pickG('${s}|${k}')">${gname(s + '|' + k)}${can(s + '|' + k) ? '' : ' 🔒'}</button>`).join('') : `<button class="gi" onclick="joinS('${s}')">➕ Join ${esc(s)}</button>`}</details>`}).join('')}<button class="g" style="margin-top:12px" onclick="S.menu=0;S.step='subj';render()">Change my subjects</button></aside>`}
+        function pickG(g) {if (!can(g)) return toast('This group is not open to you'); S.menu = 0; S.group = g; S.tab = 'chat'; app()}
+        function joinS(s) {S.subs.push(s); toast('Joined ' + s); app(true)}
+        function logout() {clearInterval(tick.i); S.step = 'login'; S.sess = null; S.subs = []; S.group = 'all'; S.tab = 'chat'; S.in = 0; S.menu = 0; render()}
+        function back() {if (S.group != 'all') {S.group = 'all'; S.tab = 'chat'; app()} else {S.step = 'subj'; render()} }
+        function go(g) {if (!can(g)) return toast('This group is not open to you'); S.group = g; app()}
+        function chat() {
+            return `<div class="msgs">${gm(S.group).map(m => m.k == 'att' ? attCard(m.s) : `<div class="m ${m.u == S.role ? 'me' : ''}"><b>${esc(m.u)}</b><div>${m.k == 'img' ? `<img src="${m.src}" alt="">` : m.k == 'f' ? '📎 ' + esc(m.t) : esc(m.t)}</div></div>`).join('')}</div>
+ <div class="bar"><input id="mi" placeholder="Message" onkeydown="event.key=='Enter'&&send()"><button class="g" onclick="file('.pdf')">PDF</button><button class="g" onclick="file('image/*')">Photo</button><button onclick="send()">Send</button></div>`}
+        function send() {const t = $('#mi').value.trim(); if (!t) return; gm(S.group).push({u: S.role, t, k: 't'}); app()}
+        function file(a) {const f = document.createElement('input'); f.type = 'file'; f.accept = a; f.onchange = () => {const x = f.files[0]; if (!x) return; if (x.size > 10e6) return toast('Max 10 MB'); gm(S.group).push(x.type.startsWith('image/') ? {u: S.role, k: 'img', t: x.name, src: URL.createObjectURL(x)} : {u: S.role, t: x.name + ' (' + Math.round(x.size / 1024) + ' KB)', k: 'f'}); toast('Shared'); app()}; f.click()}
+        function files() {const l = gm(S.group).filter(m => m.k == 'img' || m.k == 'f'); return `<div class="pad"><div class="row"><button onclick="file('image/*')">+ Photo</button><button class="g" onclick="file('.pdf')">+ PDF</button></div><div class="gal">${l.map(m => `<div>${m.k == 'img' ? `<img src="${m.src}" alt="">` : '📄'}<br>${esc(m.t)}<br><span class="mu">${esc(m.u)}</span></div>`).join('') || '<p class="mu">Nothing shared here yet.</p>'}</div></div>`}
+        function attCard(s) {
+            const left = Math.max(0, Math.ceil((s.exp - Date.now()) / 1000)), open = left > 0 && !s.closed;
+            return `<div class="m att"><b>📍 Attendance · ${esc(s.g ? gname(s.g) : '')}</b><div class="mu ${open ? 'cd' : ''}">${open ? 'Open for ' + Math.floor(left / 60) + ':' + String(left % 60).padStart(2, '0') : 'Closed'}</div>
+ ${open ? `<div class="qr" data-t="${s.token}" style="display:grid;place-items:center;margin:8px"></div><div class="code">${s.code}</div>` : '<p class="er">Session closed or expired.</p>'}
+ ${S.role == 'student' && open ? `<div class="row" style="margin-top:8px"><input id="ec" placeholder="Type code" maxlength="6" style="flex:1"><button onclick="submit($('#ec').value)">Submit</button></div><div class="row" style="margin-top:6px"><button class="g" onclick="submit('${s.code}')">Scan QR (demo)</button><label class="mu row"><input type="checkbox" style="width:auto" ${S.far ? 'checked' : ''} onchange="S.far=this.checked"> simulate far away</label></div>` : ''}
+ <p class="mu">${s.done.length} present</p></div>`
+        }
+        function drawQR() {document.querySelectorAll('.qr').forEach(e => {if (e.dataset.d == e.dataset.t) return; e.dataset.d = e.dataset.t; e.innerHTML = ''; try {new QRCode(e, {text: e.dataset.t, width: +(e.dataset.w || 140), height: +(e.dataset.w || 140)})} catch (x) {e.textContent = '[QR]'} })}
+        function attTab() {
+            const s = S.sess; const ok = S.group != 'all' && kind(S.group) == 'e';
+            const card = s && s.g == S.group ? attCard(s) : `<p class="mu">${ok ? 'No active attendance in this group.' : 'Attendance runs in a subject “Everyone” group. Open one from the list.'}</p>`;
+            return `<div class="pad">${S.role == 'teacher' ? `<button onclick="genQR()" ${ok && can(S.group) ? '' : 'disabled'}>Generate QR &amp; code</button> <button class="g" onclick="aiCount()">AI head-count</button>` : ''}${card}${S.role == 'teacher' && ok ? (can(S.group) ? recT(sub(S.group)) : '<p class="mu">Records are only for your own subjects.</p>') : ''}${S.role == 'student' && ok ? mine(sub(S.group)) : ''}</div>`
+        }
+        function pos() {return new Promise(r => navigator.geolocation ? navigator.geolocation.getCurrentPosition(p => r({lat: p.coords.latitude, lng: p.coords.longitude}), () => r(null), {timeout: 6000}) : r(null))}
+        const dist = (a, b) => {const R = 6371e3, t = x => x * Math.PI / 180, h = Math.sin(t(b.lat - a.lat) / 2) ** 2 + Math.cos(t(a.lat)) * Math.cos(t(b.lat)) * Math.sin(t(b.lng - a.lng) / 2) ** 2; return 2 * R * Math.asin(Math.sqrt(h))};
+        async function genQR() {
+            const l = await pos() || {lat: 12.9716, lng: 77.5946};
+            const sb = sub(S.group); S.students.forEach(x => {const a = x.att[sb] || (x.att[sb] = [0, 0]); a[1]++; if (Math.random() < .8) a[0]++}); (S.me[sb] = S.me[sb] || [0, 0])[1]++;
+            const s = {g: S.group, token: crypto.randomUUID(), code: String(Math.floor(100000 + Math.random() * 900000)), exp: Date.now() + 120000, loc: l, done: [], closed: false}; S.sess = s; gm(S.group).push({u: 'System', k: 'att', s}); toast('Attendance live for 2 minutes. Students receive it in the group chat.'); app(); tick()
+        }
+        function tick() {clearInterval(tick.i); tick.i = setInterval(() => {const s = S.sess; if (!s) return; const left = Math.max(0, Math.ceil((s.exp - Date.now()) / 1000)); if (left <= 0) {s.closed = true; clearInterval(tick.i); toast('Attendance session closed'); if (S.step == 'app') app(true); return } document.querySelectorAll('.cd').forEach(e => e.textContent = 'Open for ' + Math.floor(left / 60) + ':' + String(left % 60).padStart(2, '0'))}, 1000)}
+        async function submit(c) {
+            const s = S.sess; c = (c || '').trim();
+            if (!s || s.closed || Date.now() > s.exp) return toast('QR code expired'); if (c !== s.code && c !== s.token) return toast('Invalid code');
+            if (s.done.includes('You')) return toast('Attendance already recorded');
+            let p = await pos(); if (S.far) p = {lat: s.loc.lat + .01, lng: s.loc.lng}; if (!p) p = s.loc;
+            if (dist(p, s.loc) > 200) return toast('Location check failed: outside 200 m');
+            s.done.push('You'); S.me[sub(s.g)][0]++; toast('Attendance marked successfully'); app()
+        }
+        function aiCount() {const n = S.sess ? S.sess.done.length : 0; toast(`AI estimate (demo): ${n + Math.floor(Math.random() * 4)} people visible vs ${n} marked. A difference needs review, not proof of absence.`)}
+        function rec() {
+            return `<h3 style="margin-top:18px">Monthly records</h3><p class="mu">Attendance % = attended ÷ held classes × 100. Manual marks need a reason.</p><div class="tw card"><table><tr><th>Roll</th><th>Student</th><th>Attended</th><th>%</th><th></th></tr>
+ ${S.students.map((x, i) => {const p = Math.round(x.att[0] / x.att[1] * 100); return `<tr><td>${x.roll}</td><td>${esc(x.n)}</td><td>${x.att[0]}/${x.att[1]}</td><td class="${p < 75 ? 'er' : 'ok'}">${p}%</td><td><button class="g" onclick="manual(${i})">Mark present</button></td></tr>`}).join('')}</table></div>`
+        }
+        function recT(sb) {return `<h3 style="margin-top:18px">${esc(sb)} · all students</h3><p class="mu">Only you, as this subject's teacher, can see this. Attendance % = present ÷ classes held × 100.</p><div class="tw card"><table><tr><th>Roll</th><th>Student</th><th>Present</th><th>Absent</th><th>Held</th><th>%</th><th></th></tr>${S.students.map((x, i) => {const a = x.att[sb] || [0, 0], p = a[1] ? Math.round(a[0] / a[1] * 100) : 0; return `<tr><td>${x.roll}</td><td>${esc(x.n)}</td><td class="ok">${a[0]}</td><td class="er">${a[1] - a[0]}</td><td>${a[1]}</td><td class="${p < 75 ? 'er' : 'ok'}">${p}%</td><td><button class="g" onclick="manual(${i})">Mark present</button></td></tr>`}).join('')}</table></div>`}
+        function mine(sb) {const a = S.me[sb] || [0, 0], p = a[1] ? Math.round(a[0] / a[1] * 100) : 0; return `<h3 style="margin-top:18px">My attendance · ${esc(sb)}</h3><p class="mu">Only you can see this. It covers this subject only.</p><div class="stat"><div><b class="ok">${a[0]}</b><span>Days present</span></div><div><b class="er">${a[1] - a[0]}</b><span>Days absent</span></div><div><b>${p}%</b><span>of ${a[1]} classes</span></div></div>`}
+        function manual(i) {const r = prompt('Reason for manual attendance (required):'); if (!r || !r.trim()) return toast('Reason is required'); const a = S.students[i].att[sub(S.group)] || (S.students[i].att[sub(S.group)] = [0, 0]); if (a[0] < a[1]) a[0]++; toast('Marked present. Logged: ' + r.trim()); app()}
+        render();
+    </script>
+</body>
+
+</html>
